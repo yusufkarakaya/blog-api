@@ -3,11 +3,6 @@ const cors = require("cors");
 const bcrypt = require("bcrypt-nodejs");
 const app = express();
 const knex = require("knex");
-var bodyParser = require("body-parser");
-
-app.use(bodyParser.urlencoded({ extended: false }));
-// parse application/json
-app.use(bodyParser.json());
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -32,9 +27,33 @@ app.get("/", (req, res) => {
 
 app.post("/register", (req, res) => {
   const { name, email, password } = req.body;
+  if (!name || !email || !password) {
+    return res.status(400).json("incorrect form submission");
+  }
 
   const hash = bcrypt.hashSync(password);
-  res.json("registered");
+  db.transaction((trx) => {
+    trx
+      .insert({
+        hash: hash,
+        email: email,
+      })
+      .into("login")
+      .returning("email")
+      .then((loginEmail) => {
+        return trx("users")
+          .returning("*")
+          .insert({
+            email: loginEmail[0].email,
+            name: name,
+          })
+          .then((user) => {
+            res.json(user[0]);
+          });
+      })
+      .then(trx.commit)
+      .catch(trx.rollback);
+  }).catch(() => res.status(400).json("unable to register"));
 });
 
 app.post("/login", (req, res) => {
@@ -42,25 +61,53 @@ app.post("/login", (req, res) => {
   if (!email || !password) {
     return res.status(400).json("incorrect form submission");
   }
-
-  console.log(hash);
   db.select("email", "hash")
     .from("login")
-    .where("email", "=", req.body.email)
+    .where("email", "=", email)
     .then((data) => {
-      const isValid = bcrypt.compareSync(req.body.password, data[0].hash);
+      const isValid = bcrypt.compareSync(password, data[0].hash);
       if (isValid) {
         return db
           .select("*")
           .from("users")
-          .where("email", "=", req.body.email)
+          .where("email", "=", email)
           .then((user) => {
             res.json(user[0]);
           })
-          .catch((err) => res.status(400).json("unable to get user"));
+          .catch(() => res.status(400).json("unable to get user"));
+      } else {
+        res.status(400).json("wrong credentials");
       }
     })
-    .catch((err) => res.status(400).json("wrong credentials"));
+    .catch(() => res.status(400).json("wrong credentials"));
+});
+
+app.post("/admin", (req, res) => {
+  const { title, description } = req.body;
+  console.log(title);
+  console.log(description);
+  if (!title || !description) {
+    return res.status(400).json("incorrect form submission");
+  }
+
+  db.insert({
+    title: title,
+    description: description,
+    created_on: new Date(),
+  })
+    .into("posts")
+    .then((post) => {
+      res.json(post[0]);
+    })
+    .catch(() => res.status(400).json("unable to insert"));
+});
+
+app.get("/posts", (req, res) => {
+  db.select("*")
+    .from("posts")
+    .then((posts) => {
+      res.json(posts);
+    });
 });
 
 app.listen(port, () => {
