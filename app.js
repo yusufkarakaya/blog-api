@@ -84,8 +84,6 @@ app.post("/login", (req, res) => {
 
 app.post("/admin", (req, res) => {
   const { title, description } = req.body;
-  console.log(title);
-  console.log(description);
   if (!title || !description) {
     return res.status(400).json("incorrect form submission");
   }
