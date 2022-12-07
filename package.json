@@ -1,7 +1,7 @@
 {
   "scripts": {
     "serve": "nodemon server.js",
-    "build": "npm build"
+    "build": "npm run build"
   },
   "dependencies": {
     "bcrypt-nodejs": "^0.0.3",
