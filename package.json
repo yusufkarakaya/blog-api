@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "serve": "nodemon server.js"
+    "serve": "nodemon server.js",
+    "build": "npm build"
   },
   "dependencies": {
     "bcrypt-nodejs": "^0.0.3",
@@ -11,5 +12,21 @@
     "nodemon": "^2.0.20",
     "pg": "^8.8.0",
     "tinymce": "^6.3.0"
-  }
+  },
+  "name": "server",
+  "description": "\"# blog-api\"",
+  "version": "1.0.0",
+  "main": "app.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yusufkarakaya/blog-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yusufkarakaya/blog-api/issues"
+  },
+  "homepage": "https://github.com/yusufkarakaya/blog-api#readme",
+  "keywords": []
 }
