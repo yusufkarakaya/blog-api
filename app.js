@@ -8,7 +8,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors());
 
-const port = 3001;
+// const PORT = 3001;
 
 const db = knex({
   client: "pg",
@@ -108,6 +108,6 @@ app.get("/posts", (req, res) => {
     });
 });
 
-app.listen(port, () => {
-  console.log(`App listening on port ${port}`);
+app.listen(process.env.PORT || 3001, () => {
+  console.log(`App listening on port ${PORT}`);
 });
